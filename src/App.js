@@ -135,7 +135,6 @@ export default function App() {
             config={{
               gridCell: {
                 renderGridCell: ({ row, col }) => {
-                  console.log("renderGridCell", row, col);
                   return (
                     <div>
                       rr:{row} cc:{col}

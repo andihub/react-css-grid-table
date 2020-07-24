@@ -20,7 +20,7 @@ const defaultRender = () => <DefaultComponent />;
 const Grid = ({ rows, columns, config, children }) => {
   const { gridHeight } = config;
   const height = gridHeight ? { height: gridHeight } : {};
-  console.log("Grid", height, gridHeight, config);
+
   return (
     <div
       style={{
