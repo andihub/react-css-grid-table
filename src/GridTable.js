@@ -1,5 +1,8 @@
 import React from "react";
 
+const DefaultComponent = props => <div {...props} />;
+const defaultRender = () => <DefaultComponent />;
+
 const Grid = ({ rows, columns, children }) => {
   return (
     <div
@@ -24,37 +27,26 @@ const GridHeaders = ({ rows, cols, config }) => {
   );
 };
 
-const GridCornerHeader = ({ children, config }) => {
+const GridCornerHeader = ({ config }) => {
   const gridCornerConfig = config.gridCorner || {};
 
   const {
-    GridCornerComponent = GridTopLeftHeaderItem,
-    renderGridCorner = () => <div>TL</div>
+    GridCornerComponent = DefaultComponent,
+    renderGridCorner = defaultRender
   } = gridCornerConfig;
+
   return (
-    <GridCornerComponent
+    <div
       style={{
         gridRow: `tl-row-header-start / tl-row-header-end`,
         gridColumn: `tl-col-header-start / tl-col-header-end`,
         backgroundColor: "rgb(255, 255, 135)"
       }}
     >
-      {renderGridCorner({ children, config })}
-    </GridCornerComponent>
+      <GridCornerComponent>{renderGridCorner()}</GridCornerComponent>
+    </div>
   );
 };
-
-const GridTopLeftHeaderItem = ({ children }) => (
-  <div
-    style={{
-      // gridRow: `tl-row-header-start / tl-row-header-end`,
-      // gridColumn: `tl-col-header-start / tl-col-header-end`,
-      backgroundColor: "aqua"
-    }}
-  >
-    {children}
-  </div>
-);
 
 const GridRowHeaders = ({ rows, config }) => (
   <>
@@ -72,7 +64,7 @@ const GridRowHeaderItem = ({ row, config }) => {
   const gridRowConfig = config?.gridRow || {};
 
   const {
-    GridRowComponent = props => <div {...props} />,
+    GridRowComponent = DefaultComponent,
     renderGridRow = defaultRenderItem
   } = gridRowConfig;
 
@@ -107,7 +99,7 @@ const GridColumnHeaderItem = ({ col, config, children }) => {
   const gridColumnConfig = config?.gridColumn || {};
 
   const {
-    GridColumnComponent = props => <div {...props} />,
+    GridColumnComponent = DefaultComponent,
     renderGridColumn = defaultRenderItem
   } = gridColumnConfig;
 
@@ -126,16 +118,16 @@ const GridColumnHeaderItem = ({ col, config, children }) => {
   );
 };
 
-const GridCells2 = ({ items, config }) => (
+const GridCells = ({ items, config }) => (
   <>
     {items.map(item => {
       const { row, col } = getItemCoords(item);
-      return <GridCell2 key={`${row}-${col}`} item={item} config={config} />;
+      return <GridCell key={`${row}-${col}`} item={item} config={config} />;
     })}
   </>
 );
 
-const GridCell2 = ({ item, config }) => {
+const GridCell = ({ item, config }) => {
   const { row, col } = getItemCoords(item);
   const defaultRenderItem = ({ row, col }) => {
     return (
@@ -145,12 +137,12 @@ const GridCell2 = ({ item, config }) => {
     );
   };
 
-  const gridCell2Config = config?.gridCell2 || {};
+  const gridCellConfig = config?.gridCell || {};
 
   const {
-    GridCell2Component = props => <div {...props} />,
-    renderGridCell2 = defaultRenderItem
-  } = gridCell2Config;
+    GridCellComponent = DefaultComponent,
+    renderGridCell = defaultRenderItem
+  } = gridCellConfig;
 
   return (
     <div
@@ -160,9 +152,9 @@ const GridCell2 = ({ item, config }) => {
         backgroundColor: "#ccc"
       }}
     >
-      <GridCell2Component item={item} row={row} col={col}>
-        {renderGridCell2({ item, row, col })}
-      </GridCell2Component>
+      <GridCellComponent item={item} row={row} col={col}>
+        {renderGridCell({ item, row, col })}
+      </GridCellComponent>
     </div>
   );
 };
@@ -174,7 +166,7 @@ const GridContainer = ({ rows, cols, items, config }) => {
   return (
     <Grid rows={gridRowsCount} columns={gridColsCount}>
       <GridHeaders rows={rows} cols={cols} config={config} />
-      <GridCells2 items={items} config={config} />
+      <GridCells items={items} config={config} />
     </Grid>
   );
 };
@@ -197,10 +189,9 @@ const GridTable = ({
       GridColumnComponent: undefined,
       renderGridColumn: undefined
     },
-
-    gridCell2: {
-      GridCell2Component: undefined,
-      renderGridCell2: undefined
+    gridCell: {
+      GridCellComponent: undefined,
+      renderGridCell: undefined
     }
   },
   ...rest
