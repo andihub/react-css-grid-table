@@ -3,13 +3,31 @@ import React from "react";
 const DefaultComponent = props => <div {...props} />;
 const defaultRender = () => <DefaultComponent />;
 
-const Grid = ({ rows, columns, children }) => {
+// const defaultRenderRow = ({ row }) => {
+//   return <>Row {row}</>;
+// };
+// const defaultRenderColumn = ({ col }) => {
+//   return <>Col {col}</>;
+// };
+// const defaultRenderCell = ({ row, col }) => {
+//   return (
+//     <>
+//       Row {row}, Col {col}
+//     </>
+//   );
+// };
+
+const Grid = ({ rows, columns, config, children }) => {
+  const { gridHeight } = config;
+  const height = gridHeight ? { height: gridHeight } : {};
+  console.log("Grid", height, gridHeight, config);
   return (
     <div
       style={{
         display: "grid",
         gridTemplateRows: `[tl-row-header-start] 1fr [tl-row-header-end row-header-start row-start] repeat(${rows}, 1fr [row-end row-header-end row-header-start row-start])`,
-        gridTemplateColumns: `[tl-col-header-start] 1fr [tl-col-header-end col-header-start col-start] repeat(${columns}, 1fr [col-end col-header-end col-header-start col-start])`
+        gridTemplateColumns: `[tl-col-header-start] 1fr [tl-col-header-end col-header-start col-start] repeat(${columns}, 1fr [col-end col-header-end col-header-start col-start])`,
+        ...height
       }}
     >
       {children}
@@ -31,8 +49,8 @@ const GridCornerHeader = ({ config }) => {
   const gridCornerConfig = config.gridCorner || {};
 
   const {
-    GridCornerComponent = DefaultComponent,
-    renderGridCorner = defaultRender
+    GridCornerComponent, //= DefaultComponent,
+    renderGridCorner //= defaultRender
   } = gridCornerConfig;
 
   return (
@@ -43,7 +61,7 @@ const GridCornerHeader = ({ config }) => {
         backgroundColor: "rgb(255, 255, 135)"
       }}
     >
-      <GridCornerComponent>{renderGridCorner()}</GridCornerComponent>
+      {renderContent(GridCornerComponent, renderGridCorner, {})}
     </div>
   );
 };
@@ -57,15 +75,11 @@ const GridRowHeaders = ({ rows, config }) => (
 );
 
 const GridRowHeaderItem = ({ row, config }) => {
-  const defaultRenderItem = ({ row }) => {
-    return <>Row {row}</>;
-  };
-
   const gridRowConfig = config?.gridRow || {};
 
   const {
-    GridRowComponent = DefaultComponent,
-    renderGridRow = defaultRenderItem
+    GridRowComponent, //= DefaultComponent,
+    renderGridRow //= defaultRenderRow
   } = gridRowConfig;
 
   return (
@@ -76,7 +90,7 @@ const GridRowHeaderItem = ({ row, config }) => {
         backgroundColor: "rgb(255, 255, 235)"
       }}
     >
-      <GridRowComponent row={row}>{renderGridRow({ row })}</GridRowComponent>
+      {renderContent(GridRowComponent, renderGridRow, { row })}
     </div>
   );
 };
@@ -92,15 +106,11 @@ const GridColumnHeaders = ({ cols, config }) => (
 );
 
 const GridColumnHeaderItem = ({ col, config, children }) => {
-  const defaultRenderItem = ({ col }) => {
-    return <>Col {col}</>;
-  };
-
   const gridColumnConfig = config?.gridColumn || {};
 
   const {
-    GridColumnComponent = DefaultComponent,
-    renderGridColumn = defaultRenderItem
+    GridColumnComponent, //= DefaultComponent,
+    renderGridColumn //= defaultRenderColumn
   } = gridColumnConfig;
 
   return (
@@ -111,9 +121,7 @@ const GridColumnHeaderItem = ({ col, config, children }) => {
         backgroundColor: "rgb(255, 255,235)"
       }}
     >
-      <GridColumnComponent col={col}>
-        {renderGridColumn({ col })}
-      </GridColumnComponent>
+      {renderContent(GridColumnComponent, renderGridColumn, { col })}
     </div>
   );
 };
@@ -129,19 +137,12 @@ const GridCells = ({ items, config }) => (
 
 const GridCell = ({ item, config }) => {
   const { row, col } = getItemCoords(item);
-  const defaultRenderItem = ({ row, col }) => {
-    return (
-      <>
-        Row {row}, Col {col}
-      </>
-    );
-  };
 
   const gridCellConfig = config?.gridCell || {};
 
   const {
-    GridCellComponent = DefaultComponent,
-    renderGridCell = defaultRenderItem
+    GridCellComponent, //= DefaultComponent,
+    renderGridCell //= defaultRenderCell
   } = gridCellConfig;
 
   return (
@@ -152,19 +153,17 @@ const GridCell = ({ item, config }) => {
         backgroundColor: "#ccc"
       }}
     >
-      <GridCellComponent item={item} row={row} col={col}>
-        {renderGridCell({ item, row, col })}
-      </GridCellComponent>
+      {renderContent(GridCellComponent, renderGridCell, { item, row, col })}
     </div>
   );
 };
 
-const GridContainer = ({ rows, cols, items, config }) => {
+const GridContainer = ({ rows, cols, items, config, style }) => {
   const {
     gridDimensions: { gridRowsCount, gridColsCount }
   } = config;
   return (
-    <Grid rows={gridRowsCount} columns={gridColsCount}>
+    <Grid rows={gridRowsCount} columns={gridColsCount} config={config}>
       <GridHeaders rows={rows} cols={cols} config={config} />
       <GridCells items={items} config={config} />
     </Grid>
@@ -176,6 +175,7 @@ const GridTable = ({
   cols,
   items,
   config = {
+    gridHeight: undefined,
     gridDimensions: { gridRowsCount: 0, gridColsCount: 0 },
     gridCorner: {
       GridCornerComponent: undefined,
@@ -206,6 +206,18 @@ const GridTable = ({
       {...rest}
     />
   );
+};
+
+const renderContent = (RenderComponent, renderProp, props) => {
+  if (RenderComponent && renderProp) {
+    return <RenderComponent {...props}>{renderProp(props)}</RenderComponent>;
+  } else if (RenderComponent) {
+    return <RenderComponent {...props} />;
+  } else if (renderProp) {
+    return renderProp(props);
+  } else {
+    return defaultRender(props);
+  }
 };
 
 const getItemCoords = item => {

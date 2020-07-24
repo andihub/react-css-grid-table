@@ -26,7 +26,14 @@ export default function App() {
   return (
     <div className="App">
       <Collapse collapsed={true} label="default">
-        <GridTable rows={rows} cols={cols} items={items} />
+        <GridTable
+          rows={rows}
+          cols={cols}
+          items={items}
+          config={{
+            gridHeight: "200px"
+          }}
+        />
       </Collapse>
 
       <Collapse collapsed={true} label="gridCorner">
@@ -126,11 +133,12 @@ export default function App() {
             cols={[...cols, 8, 9]}
             items={items}
             config={{
-              gridCell2: {
+              gridCell: {
                 renderGridCell: ({ row, col }) => {
+                  console.log("renderGridCell", row, col);
                   return (
                     <div>
-                      r:{row} c:{col}
+                      rr:{row} cc:{col}
                     </div>
                   );
                 }
